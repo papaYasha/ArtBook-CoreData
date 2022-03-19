@@ -108,6 +108,7 @@
                         <outlet property="authorTextField" destination="WIg-Js-GSw" id="vUC-Po-MA0"/>
                         <outlet property="imageView" destination="tSM-ZN-s6L" id="Cm8-Xp-okp"/>
                         <outlet property="nameTextField" destination="pLP-qJ-9U4" id="Woh-eG-CSh"/>
+                        <outlet property="saveButton" destination="TsO-a7-LWg" id="gmk-Yf-aHO"/>
                         <outlet property="topCnsrtntMainStack" destination="9PS-Jk-OQI" id="8vO-t0-5YX"/>
                         <outlet property="yearTextField" destination="nsu-vy-DId" id="64B-RR-5LM"/>
                     </connections>

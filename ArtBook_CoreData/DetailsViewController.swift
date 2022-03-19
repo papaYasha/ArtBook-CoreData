@@ -15,6 +15,8 @@ class DetailsViewController: UIViewController {
     @IBOutlet weak var authorTextField: UITextField!
     @IBOutlet weak var yearTextField: UITextField!
     @IBOutlet weak var topCnsrtntMainStack: NSLayoutConstraint!
+    @IBOutlet weak var saveButton: UIButton!
+    
     var chosenArt = ""
     var chosenArtID: UUID?
     
@@ -61,6 +63,8 @@ class DetailsViewController: UIViewController {
     
     private func fillTheDetails() {
         if chosenArt != "" {
+            saveButton.isHidden = true
+
             let appDelegate = UIApplication.shared.delegate as! AppDelegate
             let context = appDelegate.persistentContainer.viewContext
             let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: Constants.entityName)
@@ -90,6 +94,8 @@ class DetailsViewController: UIViewController {
                 print(error.localizedDescription)
             }
         } else {
+            saveButton.isHidden = false
+            saveButton.isEnabled = false
             nameTextField.text = "e"
             yearTextField.text = "e"
             authorTextField.text = "e"
@@ -139,6 +145,7 @@ extension DetailsViewController: UITextFieldDelegate {
 extension DetailsViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         imageView.image = info[.originalImage] as? UIImage
+        saveButton.isEnabled = true
         self.dismiss(animated: true, completion: nil)
     }
 }
