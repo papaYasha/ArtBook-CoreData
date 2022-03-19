@@ -9,11 +9,14 @@ import UIKit
 import CoreData
 
 class DetailsViewController: UIViewController {
+    
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var nameTextField: UITextField!
     @IBOutlet weak var authorTextField: UITextField!
     @IBOutlet weak var yearTextField: UITextField!
     @IBOutlet weak var topCnsrtntMainStack: NSLayoutConstraint!
+    var chosenArt = ""
+    var chosenArtID: UUID?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,6 +27,7 @@ class DetailsViewController: UIViewController {
         configTapGestureRecognizer()
         configTextField()
         configImageView()
+        fillTheDetails()
     }
     
     private func configTapGestureRecognizer() {
@@ -55,7 +59,42 @@ class DetailsViewController: UIViewController {
         present(picker, animated: true, completion: nil)
     }
     
-    
+    private func fillTheDetails() {
+        if chosenArt != "" {
+            let appDelegate = UIApplication.shared.delegate as! AppDelegate
+            let context = appDelegate.persistentContainer.viewContext
+            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: Constants.entityName)
+            let idString = chosenArtID?.uuidString
+            fetchRequest.predicate = NSPredicate(format: "id = %@", idString!)
+            fetchRequest.returnsObjectsAsFaults = false
+            do {
+                let results = try context.fetch(fetchRequest)
+                if results.count > 0 {
+                    for result in results as! [NSManagedObject] {
+                        if let name = result.value(forKey: Constants.keyName) as? String {
+                            nameTextField.text = name
+                        }
+                        if let author = result.value(forKey: Constants.keyAuthor) as? String {
+                            authorTextField.text = author
+                        }
+                        if let year = result.value(forKey: Constants.keyYear) as? Int16 {
+                            yearTextField.text = String(year)
+                        }
+                        if let imageData = result.value(forKey: Constants.keyImage) as? Data {
+                            let image = UIImage(data: imageData)
+                            imageView.image = image
+                        }
+                    }
+                }
+            } catch {
+                print(error.localizedDescription)
+            }
+        } else {
+            nameTextField.text = "e"
+            yearTextField.text = "e"
+            authorTextField.text = "e"
+        }
+    }
     
     @IBAction func saveButtonPressed(_ sender: UIButton) {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate

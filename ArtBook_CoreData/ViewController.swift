@@ -13,6 +13,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     var titles = [String]()
     var idies = [UUID]()
+    var selectedArt = ""
+    var selectedArtID: UUID?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,18 +56,28 @@ class ViewController: UIViewController {
         
         do {
             let results = try context.fetch(fetchRequest)
-            for result in results as! [NSManagedObject] {
-                if let name = result.value(forKey: Constants.keyName) as? String {
-                    self.titles.append(name)
+            if results.count > 0 {
+                for result in results as! [NSManagedObject] {
+                    if let name = result.value(forKey: Constants.keyName) as? String {
+                        self.titles.append(name)
+                    }
+                    if let id = result.value(forKey: Constants.keyID) as? UUID {
+                        self.idies.append(id)
+                    }
+                    self.tableView.reloadData()
                 }
-                if let id = result.value(forKey: Constants.keyID) as? UUID {
-                    self.idies.append(id)
-                }
-                self.tableView.reloadData()
+                print("Data has retrieved")
             }
-            print("Data has retrieved")
         } catch {
             print(error.localizedDescription)
+        }
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == Constants.segueID {
+            let destinationVC = segue.destination as! DetailsViewController
+            destinationVC.chosenArt = selectedArt
+            destinationVC.chosenArtID = selectedArtID
         }
     }
 }
@@ -79,6 +91,47 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         let cell = UITableViewCell()
         cell.textLabel?.text = titles[indexPath.row]
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        selectedArt = titles[indexPath.row]
+        selectedArtID = idies[indexPath.row]
+        performSegue(withIdentifier: Constants.segueID, sender: nil)
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let appDelegate = UIApplication.shared.delegate as! AppDelegate
+            let context = appDelegate.persistentContainer.viewContext
+            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: Constants.entityName)
+            let idString = idies[indexPath.row].uuidString
+            fetchRequest.predicate = NSPredicate(format: "id = %@", idString)
+            fetchRequest.returnsObjectsAsFaults = false
+            do {
+                let results = try context.fetch(fetchRequest)
+                if results.count > 0 {
+                    for result in results as! [NSManagedObject] {
+                        if let id = result.value(forKey: Constants.keyID) as? UUID {
+                            if id == idies[indexPath.row] {
+                                context.delete(result)
+                                titles.remove(at: indexPath.row)
+                                idies.remove(at: indexPath.row)
+                                self.tableView.reloadData()
+                                
+                                do {
+                                    try context.save()
+                                } catch {
+                                    print("Delete error")
+                                }
+                                break
+                            }
+                        }
+                    }
+                }
+            } catch {
+                
+            }
+        }
     }
 }
 
