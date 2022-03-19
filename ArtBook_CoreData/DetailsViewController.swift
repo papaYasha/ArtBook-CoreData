@@ -76,6 +76,7 @@ class DetailsViewController: UIViewController {
         } catch {
             print(error.localizedDescription)
         }
+        NotificationCenter.default.post(name: NSNotification.Name(Constants.notificationName), object: nil)
     }
     
 }

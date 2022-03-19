@@ -15,4 +15,5 @@ struct Constants {
     static let keyImage = "image"
     static let entityName = "ArtCopy"
     static let keyID = "id"
+    static let notificationName = "newData"
 }
